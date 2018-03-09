@@ -4,340 +4,57 @@
 
 This work presents an extension of the initial OpenAI gym for robotics using ROS and Gazebo. A whitepaper about this work is available at https://arxiv.org/abs/1608.05742. Please use the following BibTex entry to cite our work:
 
-	@misc{1608.05742,
-		Author = {Iker Zamora and Nestor Gonzalez Lopez and Victor Mayoral Vilches and Alejandro Hernandez Cordero},
-		Title = {Extending the OpenAI Gym for robotics: a toolkit for reinforcement learning using ROS and Gazebo},
-		Year = {2016},
-		Eprint = {arXiv:1608.05742},
-	}
+```
+@article{zamora2016extending,
+  title={Extending the OpenAI Gym for robotics: a toolkit for reinforcement learning using ROS and Gazebo},
+  author={Zamora, Iker and Lopez, Nestor Gonzalez and Vilches, Victor Mayoral and Cordero, Alejandro Hernandez},
+  journal={arXiv preprint arXiv:1608.05742},
+  year={2016}
+}
+```
 
-Visit [erlerobotics/gym](http://erlerobotics.com/docs/Simulation/Gym/) for more information and videos.
+-----
+
+**`gym-gazebo` is a complex piece of software for roboticists that puts together simulation tools, robot middlewares (ROS, ROS 2), machine learning and reinforcement learning techniques. All together to create an environment whereto benchmark and develop behaviors with robots. Setting up `gym-gazebo` appropriately requires relevant familiarity with these tools.**
+
+**Code is available "as it is" and currently it's not supported by any specific organization. Community support is available [here](https://github.com/erlerobot/gym-gazebo/issues). Pull requests and contributions are welcomed.**
+
+-----
 
 ## Table of Contents
-- [Environments](#environments)
+- [Environments](#community-maintained-environments)
 - [Installation](#installation)
-	- [Docker](#docker)
-	- [Ubuntu](#ubuntu-16.04)
-	- [Ubuntu](#ubuntu-14.04)
-	    - [Requirements](#requirements)
-	    - [ROS Indigo](#ros-indigo)
-	    - [Gazebo](#gazebo)
-	    - [Gym Gazebo Pip](#gym-gazebo-pip)
-	    - [Dependencies](#dependencies)
-	      - [Automatic installation](#automatic-installation)
-	      - [Step-by-step installation](#step-by-step-installation)
-	      - [Keras and Theano installation](#keras-and-theano-installation)
-	        - [Enablig GPU for Theano](#enablig-gpu-for-theano)
 - [Usage](#usage)
 
 
-## Environments
-The following are some of the available gazebo environments:
+## Community-maintained environments
+The following are some of the gazebo environments maintained by the community using `gym-gazebo`. If you'd like to contribute and maintain an additional environment, submit a Pull Request with the corresponding addition.
 
-| Name | Status | Description |
-| ---- | ------ | ----------- |
-| `GazeboCircuit2TurtlebotLidar-v0` | Maintained | A simple circuit with straight tracks and 90 degree turns. Highly discretized LIDAR readings are used to train the Turtlebot. Scripts implementing **Q-learning** and **Sarsa** can be found in the _examples_ folder. |
-| `GazeboCircuit2TurtlebotLidarNn-v0` | | A simple circuit with straight tracks and 90 degree turns. A LIDAR is used to train the Turtlebot. Scripts implementing **DQN** can be found in the _examples_ folder.|
-| `GazeboCircuit2cTurtlebotCameraNnEnv-v0` | | A simple circuit with straight tracks and 90 degree turns with high contrast colors between the floor and the walls. A camera is used to train the Turtlebot. Scripts implementing **DQN** using **CNN** can be found in the _examples_ folder. |
+| Name | Middleware | Description | Observation Space | Action Space | Reward range |
+| ---- | ------ | ----------- | ----- | --------- | -------- |
+| ![GazeboCircuit2TurtlebotLidar-v0](imgs/GazeboCircuit2TurtlebotLidar-v0.png)`GazeboCircuit2TurtlebotLidar-v0` | ROS | A simple circuit with straight tracks and 90 degree turns. Highly discretized LIDAR readings are used to train the Turtlebot. Scripts implementing **Q-learning** and **Sarsa** can be found in the _examples_ folder. | | | |
+| ![GazeboCircuitTurtlebotLidar-v0](imgs/GazeboCircuitTurtlebotLidar-v0.png)`GazeboCircuitTurtlebotLidar-v0.png` | ROS | A more complex maze  with high contrast colors between the floor and the walls. Lidar is used as an input to train the robot for its navigation in the environment. | | | TBD |
+| `GazeboMazeErleRoverLidar-v0` | ROS, [APM](https://github.com/erlerobot/ardupilot) | **Deprecated** | | | |
+| `GazeboErleCopterHover-v0` | ROS, [APM](https://github.com/erlerobot/ardupilot) | **Deprecated** | | | |
+
+## Other environments (no support provided for these environments)
+
+The following table compiles a number of other environments that **do not have
+community support**.
+
+| Name | Middleware | Description | Observation Space | Action Space | Reward range |
+| ---- | ------ | ----------- | ----- | --------- | -------- |
+| ![cartpole-v0.png](imgs/cartpole.jpg)`GazeboCartPole-v0` | ROS | | Discrete(4,) | Discrete(2,) | 1) Pole Angle is more than ±12° 2)Cart Position is more than ±2.4 (center of the cart reaches the edge of the display) 3) Episode length is greater than 200 |
+| ![GazeboModularArticulatedArm4DOF-v1.png](imgs/GazeboModularArticulatedArm4DOF-v1.jpg)`GazeboModularArticulatedArm4DOF-v1` | ROS | This environment present a modular articulated arm robot with a two finger gripper at its end pointing towards the workspace of the robot.| Box(10,) | Box(3,) | (-1, 1) [`if rmse<5 mm 1 - rmse else reward=-rmse`]|
+| ![GazeboModularScara4DOF-v3.png](imgs/GazeboModularScara4DOF-v3.png)`GazeboModularScara4DOF-v3` | ROS | This environment present a modular SCARA robot with a range finder at its end pointing towards the workspace of the robot. The goal of this environment is defined to reach the center of the "O" from the "H-ROS" logo within the workspace. This environment compared to `GazeboModularScara3DOF-v2` is not pausing the Gazebo simulation and is tested in algorithms that solve continuous action space (PPO1 and ACKTR from baselines).This environment uses `slowness=1` and matches the delay between actions/observations to this value (slowness). In other words, actions are taken at "1/slowness" rate.| Box(10,) | Box(3,) | (-1, 1) [`if rmse<5 mm 1 - rmse else reward=-rmse`]|
+| ![GazeboModularScara3DOF-v3.png](imgs/GazeboModularScara3DOF-v3.png)`GazeboModularScara3DOF-v3` | ROS | This environment present a modular SCARA robot with a range finder at its end pointing towards the workspace of the robot. The goal of this environment is defined to reach the center of the "O" from the "H-ROS" logo within the workspace. This environment compared to `GazeboModularScara3DOF-v2` is not pausing the Gazebo simulation and is tested in algorithms that solve continuous action space (PPO1 and ACKTR from baselines).This environment uses `slowness=1` and matches the delay between actions/observations to this value (slowness). In other words, actions are taken at "1/slowness" rate.| Box(9,) | Box(3,) | (-1, 1) [`if rmse<5 mm 1 - rmse else reward=-rmse`]|
+| ![GazeboModularScara3DOF-v2.png](imgs/GazeboModularScara3DOF-v2.png)`GazeboModularScara3DOF-v2` | ROS | This environment present a modular SCARA robot with a range finder at its end pointing towards the workspace of the robot. The goal of this environment is defined to reach the center of the "O" from the "H-ROS" logo within the workspace. Reset function is implemented in a way that gives the robot 1 second to reach the "initial position".| Box(9,) | Box(3,) | (0, 1) [1 - rmse] |
+| ![GazeboModularScara3DOF-v1.png](imgs/GazeboModularScara3DOF-v1.png)`GazeboModularScara3DOF-v1` | ROS | **Deprecated** | | | TBD |
+| ![GazeboModularScara3DOF-v0.png](imgs/GazeboModularScara3DOF-v0.png)`GazeboModularScara3DOF-v0` | ROS | **Deprecated** | | | | TBD |
+| ![ariac_pick.jpg](imgs/ariac_pick.jpg)`ARIACPick-v0` | ROS | | | |  |
 
 ## Installation
-
-### Docker
-
-Build/fetch the container:
-```bash
-docker pull erlerobotics/gym-gazebo:latest # to fetch the container
-# docker build -t gym-gazebo .
-```
-
-Enter the container
-```bash
-docker run -it erlerobotics/gym-gazebo
-```
-
-If you wish to run examples that require plugins like cameras, create a fake screen with:
-```
-xvfb-run -s "-screen 0 1400x900x24" bash
-```
-
-If you have an equivalent release of Gazebo installed locally, you can connect to the gzserver inside the container using gzclient GUI by setting the address of the master URI to the containers public address.
-```
-export GAZEBO_MASTER_IP=$(sudo docker inspect --format '{{ .NetworkSettings.IPAddress }}' "id of running container")
-export GAZEBO_MASTER_URI=$GAZEBO_MASTER_IP:11345
-gzclient
-```
-
-### Ubuntu 16.04
-Basic requirements:
-- ROS Kinetic (`/rosversion: 1.12.7`)
-- Gazebo 8.1.1
-- Python 3.5.2
-
-#### ROS Kinetic dependencies
-
-```
-sudo pip3 install rospkg catkin_pkg
-
-sudo apt-get install \
-python3-defusedxml
-ros-kinetic-octomap-msgs        \
-ros-kinetic-joy                 \
-ros-kinetic-geodesy             \
-ros-kinetic-octomap-ros         \
-ros-kinetic-control-toolbox     \
-ros-kinetic-pluginlib	       \
-ros-kinetic-trajectory-msgs     \
-ros-kinetic-control-msgs	       \
-ros-kinetic-std-srvs 	       \
-ros-kinetic-nodelet	       \
-ros-kinetic-urdf		       \
-ros-kinetic-rviz		       \
-ros-kinetic-kdl-conversions     \
-ros-kinetic-eigen-conversions   \
-ros-kinetic-tf2-sensor-msgs     \
-ros-kinetic-pcl-ros
-```
-
-#### Gazebo gym
-
-```bash
-git clone https://github.com/erlerobot/gym-gazebo
-cd gym-gazebo
-sudo pip3 install -e .
-```
-
-If successful, expect something like [this](https://gist.github.com/vmayoral/4a1e5999811ac8bfbf7875670c430d27).
-
-#### Dependencies and libraries
-```
-sudo pip3 install h5py
-sudo apt-get install python3-skimage
-
-# install Theano
-cd ~/
-git clone git://github.com/Theano/Theano.git
-cd Theano/
-sudo python3 setup.py develop
-
-#install Keras
-sudo pip3 install keras
-```
-
-### Ubuntu 14.04
-#### ROS Indigo
-
-Install the Robot Operating System via:
-
-**ros-indigo-desktop-full** is the only recommended installation.
-
-- Ubuntu: http://wiki.ros.org/indigo/Installation/Ubuntu
-- Others: http://wiki.ros.org/indigo/Installation
-
-#### Gazebo
-
-- Setup your computer to accept software from packages.osrfoundation.org:
-
-```bash
-sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-```
-- Setup keys:
-
-```bash
-wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
-```
-- Install Gazebo:
-
-```bash
-sudo apt-get update
-sudo apt-get remove .*gazebo.* && sudo apt-get update && sudo apt-get install gazebo7 libgazebo7-dev
-```
-
-#### Gym Gazebo Pip
-
-```bash
-git clone https://github.com/erlerobot/gym-gazebo
-cd gym-gazebo
-sudo pip install -e .
-```
-
-#### Additional dependencies
-
-There are two options to install dependencies: automatic installation or step-by-step installation
-
-##### Automatic installation
-
-Install dependencies running [setup.bash](gym_gazebo/envs/installation/setup.bash). If you are going to use DQN with Keras, also install [Keras and Theano](#keras-and-theano-installation).
-
-```bash
-cd gym_gazebo/envs/installation
-bash setup.bash
-```
-Before running a environment, load the corresponding setup script. For example, to load the Turtlebot execute:
-
-- Turtlebot
-
-```bash
-cd gym_gazebo/envs/installation
-bash turtlebot_setup.bash
-```
-
-##### Step-by-step installation
-
-Needs to be updated, use automatic installation.
-
-<!--
-**1.** Install dependencies
-
-Install ubuntu packages
-```bash
-sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-sudo apt-key adv --keyserver hkp://pool.sks-keyservers.net --recv-key 0xB01FA116
-sudo apt-get update
-sudo apt-get install -y git                            \
-                        mercurial                      \
-                        libsdl-image1.2-dev            \
-                        libspnav-dev                   \
-                        libtbb-dev                     \
-                        libtbb2                        \
-                        libusb-dev libftdi-dev         \
-                        pyqt4-dev-tools                \
-                        python-vcstool                 \
-                        ros-indigo-bfl                 \
-                        python-pip                     \
-                        g++                            \
-                        ccache                         \
-                        realpath                       \
-                        libopencv-dev                  \
-                        libtool                        \
-                        automake                       \
-                        autoconf                       \
-                        libexpat1-dev                  \
-                        ros-indigo-mavlink             \
-                        ros-indigo-octomap-msgs        \
-                        ros-indigo-joy                 \
-                        ros-indigo-geodesy             \
-                        ros-indigo-octomap-ros         \
-                        ros-indigo-control-toolbox     \
-                        gawk                           \
-                        libtinyxml2-dev
-```
-
-Install python dependencies
-
-```bash
-sudo easy_install numpy
-sudo pip2 install pymavlink MAVProxy catkin_pkg --upgrade
-```
-
-Install Sophus
-```bash
-cd gym_gazebo/envs/installation
-git clone https://github.com/stonier/sophus -b indigo
-cd sophus
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-```
-
-Clone Ardupilot
-```bash
-cd ../..
-mkdir apm && cd apm
-git clone https://github.com/erlerobot/ardupilot -b gazebo_udp
-```
-
-Install JSBSim
-```bash
-git clone git://github.com/tridge/jsbsim.git
-# Additional dependencies required
-sudo apt-get install libtool automake autoconf libexpat1-dev
-cd jsbsim
-./autogen.sh --enable-libraries
-make -j2
-sudo make install
-```
-
-**2.** Create a catkin workspace
-
-First load ROS environment variables
-```bash
-source /opt/ros/indigo/setup.bash
-```
-Then, create the catkin workspace inside `gym_gazebo/envs/installation/` directory
-
-```bash
-cd ../..
-mkdir -p catkin_ws/src # Inside installation/ folder
-cd catkin_ws/src
-catkin_init_workspace
-```
-**3.** Import packages into catkin workspace and build
-
-```bash
-cd ../../catkin_ws/src/
-vcs import < ../../gazebo.repos
-cd ..
-catkin_make --pkg mav_msgs
-catkin_make
-# If your computer crashes, try 'catkin_make -j1' instead
-```
-**4.** Add GAZEBO_MODEL_PATH to your `bashrc` and load it
-
-```bash
-cd ../../assets/models
-echo "export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$(pwd)" >> ~/.bashrc
-source ~/.bashrc
-```
-
-**5.** Before running a environment, load the corresponding setup script. For example, to load the Turtlebot execute:
-
-- Turtlebot
-
-```bash
-cd gym_gazebo/envs/installation
-bash turtlebot_setup.bash
-```
--->
-
-##### Keras and Theano installation
-This part of the installation is required only for the environments using DQN.
-
-```bash
-# install dependencies
-
-sudo apt-get install gfortran
-
-# install sript specific dependencies (temporal)
-sudo apt-get install python-skimage
-
-# install Theano
-git clone git://github.com/Theano/Theano.git
-cd Theano/
-sudo python setup.py develop
-
-#isntall Keras
-sudo pip install keras
-```
-dot_parser error fix:
-```bash
-sudo pip install --upgrade pydot
-sudo pip install --upgrade pyparsing
-```
-
-##### Enablig GPU for Theano
-
-Follow the instructions [here](http://deeplearning.net/software/theano/install.html#gpu-linux) and change $PATH instead of $CUDA_ROOT.
-
-Working on a clean installation of Ubuntu 14.04 using CUDA 7.5.
-
-The following flags are needed in order to execute in GPU mode, using an alias is recommended.
-```bash
-THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX=float32
-```
-
----
+Refer to [INSTALL.md](INSTALL.md)
 
 ## Usage
 
@@ -393,5 +110,5 @@ Sometimes, after ending or killing the simulation `gzserver` and `rosmaster` sta
 We recommend creating an alias to kill those processes.
 
 ```bash
-echo "alias k='killall -9 gzserver gzclient roslaunch rosmaster'" >> ~/.bashrc
+echo "alias killgazebogym='killall -9 rosout roslaunch rosmaster gzserver nodelet robot_state_publisher gzclient'" >> ~/.bashrc
 ```
